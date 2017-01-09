@@ -12,7 +12,9 @@ var Index = React.createClass({displayName: "Index",
     return (
         React.createElement("div", null, 
         	React.createElement(Header, null), 
-        	React.createElement(Body, null), 
+          React.createElement("div", {className: "main"}, 
+          	React.createElement(Body, null)
+          ), 
         	React.createElement(Footer, null)
         )
     );
@@ -27,20 +29,154 @@ ReactDOM.render(
 
 },{"./views/body.jsx":2,"./views/footer.jsx":3,"./views/header.jsx":4,"react":181,"react-dom":30}],2:[function(require,module,exports){
 var React = require('react');
+var ReactDOM = require('react-dom');
 
 var Body = React.createClass({displayName: "Body",
-	render: function(){
-		return (
-			React.createElement("div", {style: {textAlign: "center"}}, 
-				React.createElement("h1", null, "This is a body.")
-			)
-		);
-	}
+  render: function(){
+    return (
+      React.createElement(UserBox, null)
+    );
+  }
+});
+
+// UserBox = UserForm + UserList
+var UserBox = React.createClass({displayName: "UserBox",
+  getInitialState: function(){
+    return {userData:[]};
+  },
+  handleAddUser: function(name, mail, gender){
+    var data = this.state.userData;
+    data.push({name: name, mail: mail, gender: gender});
+    this.setState({userData: data});
+  },
+  render: function(){
+    return(
+      React.createElement("div", {style: {width:"300px"}}, 
+        React.createElement(UserForm, {addUser: this.handleAddUser}), 
+        React.createElement("hr", null), 
+        React.createElement(UserList, {userData: this.state.userData})
+      )
+    );
+  }
+});
+
+// User is an entry in UserList
+var User = React.createClass({displayName: "User",
+  propTypes:{
+    name: React.PropTypes.string.isRequired,
+    mail: React.PropTypes.string,
+    gender: React.PropTypes.string
+  },
+  render:function(){
+    return (
+      React.createElement("tr", null, 
+        React.createElement("td", null, this.props.name), 
+        React.createElement("td", null, this.props.mail), 
+        React.createElement("td", null, this.props.gender)
+      )
+    );
+  }
+});
+
+// UserList = a list of User
+var UserList = React.createClass({displayName: "UserList",
+  propTypes:{
+    userData:React.PropTypes.arrayOf(React.PropTypes.object).isRequired
+  },
+  render: function(){
+    var UserNodes = this.props.userData.map(function(user, index){
+      return (
+        React.createElement(User, {name: user.name, mail: user.mail, gender: user.gender, key: index})
+      );
+    });
+    return (
+      React.createElement("table", null, 
+        React.createElement("tbody", null, 
+          React.createElement("tr", null, 
+            React.createElement("th", null, "Name"), 
+            React.createElement("th", null, "Mail Address"), 
+            React.createElement("th", null, "Gender")
+          ), 
+          UserNodes
+        )
+      )
+    );
+  }
+});
+
+var UserForm = React.createClass({displayName: "UserForm",
+  propTypes:{
+    addUser:React.PropTypes.func.isRequired
+  },
+  getInitialState: function(){
+  	return {
+  		selectedGender: "other"
+  	};
+  },
+  handleGenderChange: function(changeEvent) {
+  	this.setState({
+  		selectedGender: changeEvent.target.value
+  	})
+  },
+  handleSubmit: function(){
+    var name = ReactDOM.findDOMNode(this.refs.name).value.trim();
+    var mail = ReactDOM.findDOMNode(this.refs.mail).value.trim();
+    if (!name){
+	  console.log("Name is required.");
+      return;
+    }
+    console.log('Adding a user:', name, mail, this.state.selectedOption);
+    this.props.addUser(name, mail, this.state.selectedGender);
+    ReactDOM.findDOMNode(this.refs.name).value = "";
+    ReactDOM.findDOMNode(this.refs.mail).value = "";
+	this.setState({
+  		selectedGender: "other"
+  	});
+  },
+  render:function(){
+    return (
+      React.createElement("div", null, 
+        React.createElement("table", null, 
+          React.createElement("tbody", null, 
+            React.createElement("tr", null, 
+              React.createElement("td", null, 
+                React.createElement("label", null, "Name")
+              ), 
+              React.createElement("td", null, 
+                React.createElement("input", {type: "text", ref: "name"})
+              )
+            ), 
+            React.createElement("tr", null, 
+              React.createElement("td", null, 
+                React.createElement("label", null, "Mail Address")
+              ), 
+              React.createElement("td", null, 
+                React.createElement("input", {type: "text", ref: "mail"})
+              )
+            ), 
+            React.createElement("tr", null, 
+              React.createElement("td", null, 
+                React.createElement("label", null, "Gender")
+              ), 
+              React.createElement("td", null, 
+                React.createElement("input", {type: "radio", value: "male", checked: this.state.selectedGender === "male", onChange: this.handleGenderChange}), "Male", 
+                React.createElement("input", {type: "radio", value: "female", checked: this.state.selectedGender === "female", onChange: this.handleGenderChange}), "Female", 
+                React.createElement("input", {type: "radio", value: "other", checked: this.state.selectedGender === "other", onChange: this.handleGenderChange}), "Other"
+              )
+            )
+          )
+        ), 
+        React.createElement("div", {style: {textAlign:"right"}}, 
+          React.createElement("button", {onClick: this.handleSubmit}, "Add")
+        )
+      )
+    );
+  }
 });
 
 module.exports = Body;
 
-},{"react":181}],3:[function(require,module,exports){
+},{"react":181,"react-dom":30}],3:[function(require,module,exports){
 var React = require('react');
 
 var Footer = React.createClass({displayName: "Footer",

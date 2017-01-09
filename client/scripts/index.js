@@ -11,7 +11,9 @@ var Index = React.createClass({
     return (
         <div>
         	<Header/>
-        	<Body/>
+          <div className="main">
+          	<Body/>
+          </div>
         	<Footer/>
         </div>
     );
